@@ -13,12 +13,29 @@ class ControllerPaymentCharityclear extends Controller {
 		$this->data['merchantid'] = $this->config->get('charityclear_merchantid');
 		$this->data['merchantsecret'] = $this->config->get('charityclear_merchantsecret');
         $this->data['amount'] = (int) round( ( $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false) * 100 ) );
+
+
         $this->data['countrycode'] = $this->config->get('charityclear_countrycode');
-        $this->data['currencycode'] = $this->config->get('charityclear_currencycode');
+
+		switch($order_info['currency_code']){
+			case 'EUR':
+				$this->data['currencycode'] = 978;
+				break;
+			case 'USD':
+				$this->data['currencycode'] = 840;
+				break;
+			case 'GBP':
+				$this->data['currencycode'] = 826;
+				break;
+			default :
+				$this->data['currencycode'] = $this->config->get('charityclear_currencycode');
+				break;
+		}
+
 		$this->data['trans_id'] = $this->session->data['order_id'];
 		$this->data['callback'] = $this->url->link('payment/charityclear/callback', '', 'SSL');
 		$this->data['bill_name'] = $order_info['payment_firstname'] . ' ' . $order_info['payment_lastname'];
-        
+
         $this->data['bill_addr'] = "";
         
         if( isset( $order_info['payment_address_1'] ) && ( $order_info['payment_address_1'] != "" ) ){
@@ -120,8 +137,8 @@ class ControllerPaymentCharityclear extends Controller {
             $this->data['text_mismatch'] = $this->language->get('text_mismatch');
 	
 			if( isset($this->request->post['responseCode']) && $this->request->post['responseCode'] === "0" ){
-    
-                if( (int) $this->request->post['amount'] === (int) ( $order_info['total'] * 100 ) ){
+    //var_dump((int) round( ( $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false) * 100 ) ),$this->request->post['amount'], $order_info['total']*100, $order_info,$this->request );
+                if( (int) $this->request->post['amount'] === (int) round( ( $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value'], false) * 100 )  ) ){
                     //Amount paid matches the amount paid.
                     
                     $this->load->model('checkout/order');
